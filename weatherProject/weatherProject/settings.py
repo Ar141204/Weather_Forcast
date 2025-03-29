@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = ['*']  # We'll update this with your domain later
+ALLOWED_HOSTS = ['weatherforcast.up.railway.app', 'localhost', '127.0.0.1']
 
 # Weather API Key
 WEATHER_API_KEY = os.getenv('WEATHER_API_KEY')
@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'forecast',
+    'forecast.apps.ForecastConfig',
 ]
 
 MIDDLEWARE = [
