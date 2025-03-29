@@ -146,75 +146,79 @@ def predict_future(model, current_value):
 
 # 8
 
+@ensure_csrf_cookie
+def index(request):
+    return render(request, 'weather.html')
+
 def weather_view(request):
     if request.method == 'POST':
-        city = request.POST.get('city', '').strip()
-        if not city:
-            return render(request, 'weather.html', {'error': 'Please enter a city name.'})
-    else:
-        city = 'London'  # default city
+        city = request.POST.get('city')
+        api_key = os.getenv('WEATHER_API_KEY')
+        
+        # Get current weather
+        current_url = f'http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric'
+        # Get forecast
+        forecast_url = f'http://api.openweathermap.org/data/2.5/forecast?q={city}&appid={api_key}&units=metric'
+        
+        try:
+            current_response = requests.get(current_url)
+            forecast_response = requests.get(forecast_url)
+            
+            if current_response.status_code == 200 and forecast_response.status_code == 200:
+                current_data = current_response.json()
+                forecast_data = forecast_response.json()
+                
+                # Process forecast data for the next 5 time periods
+                forecast_times = []
+                forecast_temps = []
+                forecast_hums = []
+                
+                for i, item in enumerate(forecast_data['list'][:5]):
+                    time = datetime.fromtimestamp(item['dt']).strftime('%H:%M')
+                    forecast_times.append(time)
+                    forecast_temps.append(round(item['main']['temp']))
+                    forecast_hums.append(item['main']['humidity'])
 
-    current_weather = get_current_weather(city)
+                context = {
+                    'city': city,
+                    'country': current_data['sys']['country'],
+                    'date': datetime.now().strftime('%B %d, %Y'),
+                    'description': current_data['weather'][0]['description'],
+                    'current_temp': round(current_data['main']['temp']),
+                    'feels_like': round(current_data['main']['feels_like']),
+                    'humidity': current_data['main']['humidity'],
+                    'pressure': current_data['main']['pressure'],
+                    'wind': current_data['wind']['speed'],
+                    'clouds': current_data['clouds']['all'],
+                    'visibility': current_data.get('visibility', 'N/A'),
+                    'MaxTemp': round(current_data['main']['temp_max']),
+                    'MinTemp': round(current_data['main']['temp_min']),
+                    
+                    # Forecast data
+                    'time1': forecast_times[0],
+                    'time2': forecast_times[1],
+                    'time3': forecast_times[2],
+                    'time4': forecast_times[3],
+                    'time5': forecast_times[4],
+                    'temp1': forecast_temps[0],
+                    'temp2': forecast_temps[1],
+                    'temp3': forecast_temps[2],
+                    'temp4': forecast_temps[3],
+                    'temp5': forecast_temps[4],
+                    'hum1': forecast_hums[0],
+                    'hum2': forecast_hums[1],
+                    'hum3': forecast_hums[2],
+                    'hum4': forecast_hums[3],
+                    'hum5': forecast_hums[4],
+                }
+                return render(request, 'weather.html', context)
+            else:
+                return render(request, 'weather.html', {'error': 'City not found'})
+                
+        except Exception as e:
+            return render(request, 'weather.html', {'error': str(e)})
     
-    if 'error' in current_weather:
-        return render(request, 'weather.html', {'error': current_weather['error'], 'city': city})
-
-    try:
-        # Prepare time for future predictions
-        now = datetime.now()
-        next_hour = now + timedelta(hours=1)
-        next_hour = next_hour.replace(minute=0, second=0, microsecond=0)
-        future_times = [(next_hour + timedelta(hours=i)).strftime("%H:00") for i in range(5)]
-
-        # Simple temperature prediction (gradual decrease then increase)
-        current_temp = float(current_weather['current_temp'])
-        temp_variations = [-0.4, -3.0, -3.2, -5.1, -2.1]  # Temperature variations
-        future_temps = [current_temp + variation for variation in temp_variations]
-
-        # Simple humidity prediction (gradual change)
-        current_humidity = float(current_weather['humidity'])
-        humidity_variations = [-5.2, -13.8, -24.8, -23.7, -21.8]  # Humidity variations
-        future_humidity = [max(min(current_humidity + variation, 100), 0) for variation in humidity_variations]
-
-        context = {
-            'location': city,
-            'current_temp': current_weather['current_temp'],
-            'MinTemp': current_weather['temp_min'],
-            'MaxTemp': current_weather['temp_max'],
-            'feels_like': current_weather['feels_like'],
-            'humidity': current_weather['humidity'],
-            'clouds': current_weather['clouds'],
-            'description': current_weather['description'],
-            'city': current_weather['city'],
-            'country': current_weather['country'],
-            'date': datetime.now().strftime("%B %d, %Y"),
-            'wind': current_weather['Wind_Gust_Speed'],
-            'pressure': current_weather['pressure'],
-            'visibility': current_weather['visibility'],
-            'time1': future_times[0],
-            'time2': future_times[1],
-            'time3': future_times[2],
-            'time4': future_times[3],
-            'time5': future_times[4],
-            'temp1': f"{round(future_temps[0], 1)}",
-            'temp2': f"{round(future_temps[1], 1)}",
-            'temp3': f"{round(future_temps[2], 1)}",
-            'temp4': f"{round(future_temps[3], 1)}",
-            'temp5': f"{round(future_temps[4], 1)}",
-            'hum1': f"{round(future_humidity[0], 1)}",
-            'hum2': f"{round(future_humidity[1], 1)}",
-            'hum3': f"{round(future_humidity[2], 1)}",
-            'hum4': f"{round(future_humidity[3], 1)}",
-            'hum5': f"{round(future_humidity[4], 1)}",
-        }
-
-        return render(request, 'weather.html', context)
-
-    except Exception as e:
-        return render(request, 'weather.html', {
-            'error': f"An error occurred while processing weather data: {str(e)}",
-            'city': city
-        })
+    return render(request, 'weather.html')
 
 from django.shortcuts import render  # Ensure this is imported
 
@@ -222,10 +226,6 @@ def my_view(request):  # Ensure the request parameter exists
     if request.method == "POST":
         print(request.POST)  # Now it will work correctly
     return render(request, "some_template.html")
-
-@ensure_csrf_cookie  # Add this decorator
-def index(request):
-    return render(request, 'index.html')
 
 def weather(request):
     if request.method == 'POST':
