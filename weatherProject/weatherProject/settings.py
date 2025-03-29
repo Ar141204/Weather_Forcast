@@ -160,8 +160,26 @@ if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
 
-# Add these settings
-CSRF_TRUSTED_ORIGINS = ['https://weatherforcast.up.railway.app']
-CSRF_COOKIE_SECURE = True
+# Update these settings
+CSRF_TRUSTED_ORIGINS = [
+    'https://weatherforcast.up.railway.app',
+    'http://weatherforcast.up.railway.app'
+]
+
+# Make sure you have these middleware settings
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',  # Make sure this is here
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+# Security settings
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
