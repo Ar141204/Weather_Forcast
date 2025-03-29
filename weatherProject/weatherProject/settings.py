@@ -166,13 +166,16 @@ CSRF_TRUSTED_ORIGINS = [
     'http://weatherforcast.up.railway.app'
 ]
 
-# Make sure you have these middleware settings
+# For testing, temporarily set DEBUG to True
+DEBUG = True  # Change this temporarily to see detailed error messages
+
+# Make sure MIDDLEWARE includes CsrfViewMiddleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',  # Make sure this is here
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',

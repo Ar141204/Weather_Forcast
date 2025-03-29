@@ -6,6 +6,7 @@ import numpy as np  # For numerical operations
 import pytz
 import os
 from django.conf import settings
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 # Get the BASE_DIR
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -220,4 +221,8 @@ def my_view(request):  # Ensure the request parameter exists
     if request.method == "POST":
         print(request.POST)  # Now it will work correctly
     return render(request, "some_template.html")
+
+@ensure_csrf_cookie  # Add this decorator
+def index(request):
+    return render(request, 'index.html')
 
