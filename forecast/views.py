@@ -7,6 +7,7 @@ import pytz
 import os
 from django.conf import settings
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.http import JsonResponse
 
 # Get the BASE_DIR
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -225,4 +226,35 @@ def my_view(request):  # Ensure the request parameter exists
 @ensure_csrf_cookie  # Add this decorator
 def index(request):
     return render(request, 'index.html')
+
+def weather(request):
+    if request.method == 'POST':
+        try:
+            import json
+            data = json.loads(request.body)
+            city = data.get('city')
+            
+            # Get API key from environment variable
+            api_key = os.getenv('WEATHER_API_KEY')
+            
+            # Make request to OpenWeatherMap API
+            url = f'http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric'
+            response = requests.get(url)
+            weather_data = response.json()
+            
+            if response.status_code == 200:
+                return JsonResponse({
+                    'city': weather_data['name'],
+                    'temperature': weather_data['main']['temp'],
+                    'description': weather_data['weather'][0]['description'],
+                    'humidity': weather_data['main']['humidity'],
+                    'wind_speed': weather_data['wind']['speed']
+                })
+            else:
+                return JsonResponse({'error': 'City not found'}, status=404)
+                
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+            
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
 
