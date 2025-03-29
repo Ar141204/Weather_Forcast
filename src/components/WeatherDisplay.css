@@ -1,0 +1,83 @@
+.weather-container {
+  min-height: 100vh;
+  padding: 20px;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+              url('../assets/cloudy-background.jpg');
+  background-size: cover;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-box {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 30px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.cloud-icon {
+  margin-right: 10px;
+}
+
+.search-box input {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 18px;
+  width: 100%;
+  outline: none;
+}
+
+/* New main content layout */
+.main-content {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.temperature-display {
+  flex: 1;
+  margin-bottom: 30px;
+}
+
+.temp {
+  font-size: 100px;
+  margin: 0;
+  font-weight: 300;
+}
+
+.feels-like {
+  font-size: 24px;
+  margin: 0;
+}
+
+/* Info boxes now on the right side */
+.info-boxes {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 40%;
+}
+
+.info-box {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  padding: 20px;
+  width: 100%;
+}
+
+.info-box h2 {
+  font-size: 40px;
+  margin: 0;
+  font-weight: 500;
+}
+
+.info-box p {
+  margin: 5px 0 0 0;
+  font-size: 18px;
+  opacity: 0.8;
+} 
