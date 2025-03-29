@@ -6,7 +6,7 @@ import numpy as np  # For numerical operations
 import pytz
 import os
 from django.conf import settings
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.http import JsonResponse
 
 # Get the BASE_DIR
@@ -150,6 +150,7 @@ def predict_future(model, current_value):
 def index(request):
     return render(request, 'weather.html')
 
+@csrf_exempt
 def weather_view(request):
     if request.method == 'POST':
         city = request.POST.get('city')
